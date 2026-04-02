@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-const API_BASE = "http://localhost:8080/resolutions";
+const API_BASE = "https://proof-of-resolution-backend.vercel.app/resolutions";
 
 const CATEGORY_ICONS = {
   Health: "♥", Finance: "◈", Career: "▲", Learning: "◉",
