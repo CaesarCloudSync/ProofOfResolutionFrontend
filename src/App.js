@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-const API_BASE = "https://proof-of-resolution-backend.vercel.app/resolutions";
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8080/resolutions";
 
 const CATEGORY_ICONS = {
   Health: "♥", Finance: "◈", Career: "▲", Learning: "◉",
@@ -73,7 +73,7 @@ function MiningAnimation({ onComplete }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,20,0.88)", backdropFilter: "blur(6px)" }}>
       <div style={{ background: "linear-gradient(135deg,#0d0d2b,#1a1a4e)", border: "1px solid rgba(116,192,252,0.3)", borderRadius: 20, padding: "48px 64px", textAlign: "center", maxWidth: 420 }}>
-        <div style={{ fontSize: 48, marginBottom: 20, animation: "spin 1s linear infinite" }}>⛏</div>
+        <div style={{ display: "inline-block", border: "4px solid rgba(116,192,252,0.1)", borderTop: "4px solid #ffd93d", borderRadius: "50%", width: 50, height: 50, marginBottom: 20, animation: "spin 1s linear infinite" }} />
         <h2 style={{ color: "#ffd93d", fontFamily: "'Space Mono',monospace", fontSize: 22, margin: "0 0 8px" }}>Mining Block...</h2>
         <p style={{ color: "rgba(116,192,252,0.7)", fontSize: 13, fontFamily: "'Space Mono',monospace", margin: "0 0 24px" }}>Solving proof of work</p>
         <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: "#6bcb77", background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: "10px 16px", marginBottom: 24, letterSpacing: 2 }}>
@@ -100,7 +100,9 @@ function ImmutableModal({ data, onClose }) {
         onClick={e => e.stopPropagation()}
         style={{ background: "linear-gradient(135deg,#0d0d2b,#1a1a4e)", border: `1px solid ${accent}44`, borderRadius: 20, padding: "40px 48px", maxWidth: 460, width: "90%", textAlign: "center", animation: "slideInUp 0.35s ease-out", position: "relative" }}>
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${accent},transparent)`, borderRadius: "20px 20px 0 0" }} />
-        <div style={{ fontSize: 52, marginBottom: 20 }}>{isDelete ? "🔒" : "✋"}</div>
+        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: accent, marginBottom: 20, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>
+          {isDelete ? "Action Locked" : "Action Forbidden"}
+        </div>
         <p style={{ color: "#fff", fontSize: 16, lineHeight: 1.6, margin: "0 0 16px", fontFamily: "'Space Grotesk',sans-serif" }}>
           {data.message}
         </p>
@@ -112,7 +114,7 @@ function ImmutableModal({ data, onClose }) {
           <span style={{ color: accent, fontSize: 11, fontFamily: "'Space Mono',monospace", wordBreak: "break-all" }}>{data.goal_id}</span>
         </div>
         <button onClick={onClose} style={{ padding: "12px 32px", borderRadius: 10, background: `${accent}18`, border: `1px solid ${accent}55`, color: accent, fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer" }}>
-          GOT IT ✓
+          GOT IT
         </button>
       </div>
     </div>
@@ -190,14 +192,14 @@ function ResolutionDetail({ resolution, onBack, onUpdate, onDelete }) {
                 style={{ flex: 1, padding: "14px", borderRadius: 12, background: "rgba(255,217,61,0.08)", border: "1px solid rgba(255,217,61,0.3)", color: "#ffd93d", fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer", transition: "background 0.2s" }}
                 onMouseEnter={e => e.currentTarget.style.background = "rgba(255,217,61,0.16)"}
                 onMouseLeave={e => e.currentTarget.style.background = "rgba(255,217,61,0.08)"}>
-                ✏ UPDATE
+                UPDATE
               </button>
               <button
                 onClick={onDelete}
                 style={{ flex: 1, padding: "14px", borderRadius: 12, background: "rgba(255,107,107,0.08)", border: "1px solid rgba(255,107,107,0.3)", color: "#ff6b6b", fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer", transition: "background 0.2s" }}
                 onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,107,0.16)"}
                 onMouseLeave={e => e.currentTarget.style.background = "rgba(255,107,107,0.08)"}>
-                🗑 DELETE
+                DELETE
               </button>
             </div>
           </div>
@@ -361,7 +363,6 @@ export default function App() {
 
         {/* ── Header ── */}
         <div style={{ textAlign: "center", padding: "60px 0 40px" }}>
-          <div style={{ fontSize: 48, marginBottom: 12, animation: "float 4s ease-in-out infinite" }}>⛓️</div>
           <h1 style={{ fontFamily: "'Space Mono',monospace", fontSize: "clamp(28px,6vw,48px)", margin: "0 0 8px", letterSpacing: -1, background: "linear-gradient(135deg,#ffd93d 0%,#ff6b6b 50%,#74c0fc 100%)", backgroundSize: "200% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 4s linear infinite" }}>
             ProofOfResolution
           </h1>
@@ -370,9 +371,9 @@ export default function App() {
 
         {/* ── Nav ── */}
         <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 40 }}>
-          {[{ id: "home", label: "Mine Resolution", icon: "⛏" }, { id: "chain", label: "The Chain", icon: "⛓" }].map(tab => (
+          {[{ id: "home", label: "Mine Resolution" }, { id: "chain", label: "The Chain" }].map(tab => (
             <button key={tab.id} onClick={() => setView(tab.id)} style={{ padding: "12px 28px", borderRadius: 99, fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer", transition: "all 0.2s", border: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "1px solid #ffd93d" : "1px solid rgba(255,255,255,0.15)", background: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "rgba(255,217,61,0.12)" : "rgba(255,255,255,0.04)", color: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "#ffd93d" : "rgba(255,255,255,0.6)" }}>
-              {tab.icon} {tab.label}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -380,13 +381,13 @@ export default function App() {
         {/* ── Banners ── */}
         {error && (
           <div style={{ background: "rgba(255,107,107,0.12)", border: "1px solid rgba(255,107,107,0.35)", borderRadius: 12, padding: "14px 20px", marginBottom: 20, color: "#ff6b6b", fontSize: 14, display: "flex", gap: 10, alignItems: "center" }}>
-            <span>⚠</span> {error}
+            {error}
             <button onClick={() => setError(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ff6b6b", cursor: "pointer", fontSize: 16 }}>✕</button>
           </div>
         )}
         {success && (
           <div style={{ background: "rgba(107,203,119,0.12)", border: "1px solid rgba(107,203,119,0.35)", borderRadius: 12, padding: "14px 20px", marginBottom: 20, color: "#6bcb77", fontSize: 14, fontFamily: "'Space Mono',monospace", animation: "slideInUp 0.4s ease-out" }}>
-            ✓ {success}
+            {success}
           </div>
         )}
 
@@ -417,15 +418,18 @@ export default function App() {
                 style={{ marginTop: 8, padding: "16px 32px", borderRadius: 12, background: "linear-gradient(135deg,#ffd93d,#ff922b)", border: "none", color: "#0d0d2b", fontWeight: 700, fontFamily: "'Space Mono',monospace", fontSize: 15, cursor: "pointer", letterSpacing: 1, transition: "all 0.2s", boxShadow: "0 4px 30px rgba(255,217,61,0.25)" }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 8px 40px rgba(255,217,61,0.4)"; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 30px rgba(255,217,61,0.25)"; }}>
-                ⛏ MINE BLOCK
+                MINE BLOCK
               </button>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginTop: 32 }}>
-              {[{ icon: "🔒", title: "Immutable", body: "Once mined, never changed" }, { icon: "⛓", title: "Chained", body: "Linked to all prior blocks" }, { icon: "♾", title: "Forever", body: "Stored on the blockchain" }].map(item => (
-                <div key={item.title} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
-                  <div style={{ fontSize: 22, marginBottom: 6 }}>{item.icon}</div>
-                  <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{item.title}</div>
-                  <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 12 }}>{item.body}</div>
+              {[
+                { color: "#ffd93d", title: "Immutable", body: "Once mined, never changed" },
+                { color: "#74c0fc", title: "Chained", body: "Linked to all prior blocks" },
+                { color: "#cc5de8", title: "Forever", body: "Stored on the blockchain" }
+              ].map(item => (
+                <div key={item.title} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderTop: `2px solid ${item.color}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                  <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, fontWeight: 700, marginBottom: 6, fontFamily: "'Space Grotesk',sans-serif" }}>{item.title}</div>
+                  <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, lineHeight: 1.4 }}>{item.body}</div>
                 </div>
               ))}
             </div>
@@ -448,15 +452,14 @@ export default function App() {
             </div>
             {loading && !resolutions.length ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: "rgba(116,192,252,0.5)", fontFamily: "'Space Mono',monospace" }}>
-                <div style={{ fontSize: 32, animation: "spin 1s linear infinite", marginBottom: 16 }}>⛏</div>
-                Syncing with the chain...
+                <div style={{ display: "inline-block", border: "3px solid rgba(116,192,252,0.1)", borderTop: "3px solid #ffd93d", borderRadius: "50%", width: 36, height: 36, marginBottom: 16, animation: "spin 1s linear infinite" }} />
+                <div style={{ fontSize: 13 }}>Syncing with the chain...</div>
               </div>
             ) : resolutions.length === 0 ? (
               <div style={{ textAlign: "center", padding: "60px 20px", background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: 20 }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>⛓</div>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono',monospace", fontSize: 13 }}>The chain is empty.<br />Mine your first resolution!</p>
-                <button onClick={() => setView("home")} style={{ marginTop: 16, padding: "10px 24px", borderRadius: 10, background: "rgba(255,217,61,0.1)", border: "1px solid rgba(255,217,61,0.3)", color: "#ffd93d", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer" }}>
-                  ⛏ Mine First Resolution
+                <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono',monospace", fontSize: 13, margin: "0 0 16px" }}>The chain is empty.<br />Mine your first resolution!</p>
+                <button onClick={() => setView("home")} style={{ padding: "10px 24px", borderRadius: 10, background: "rgba(255,217,61,0.1)", border: "1px solid rgba(255,217,61,0.3)", color: "#ffd93d", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer" }}>
+                  Mine First Resolution
                 </button>
               </div>
             ) : (
