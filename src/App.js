@@ -84,7 +84,7 @@ function ImmutableModal({ data, onClose }) {
 }
 
 /* ─── Resolution Detail View ─────────────────────────────── */
-function ResolutionDetail({ resolution, onBack, onUpdate, onDelete }) {
+function ResolutionDetail({ resolution, onBack, onUpdate, onDelete, onValidate }) {
   return (
     <div style={{ animation: "slideInUp 0.25s ease-out" }}>
       <button onClick={onBack} style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 20, background: "#18181b", border: "1px solid #27272a", color: "#a1a1aa", borderRadius: 6, padding: "8px 14px", fontFamily: "'Space Mono',monospace", fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}
@@ -154,6 +154,13 @@ function ResolutionDetail({ resolution, onBack, onUpdate, onDelete }) {
               onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
               PURGE
+            </button>
+            <button
+              onClick={() => onValidate(resolution.block_index)}
+              style={{ flex: 1, padding: "12px", borderRadius: 6, background: "transparent", border: "1px solid #27272a", color: "#a1a1aa", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer", transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
+              VALIDATE
             </button>
           </div>
         </div>
@@ -266,6 +273,38 @@ export default function App() {
       const data = await res.json();
       setImmutableModal(data);
     } catch { setError("Request failed."); }
+  };
+
+  const handleValidateChain = async () => {
+    setLoading(true); setError(null); setSuccess(null);
+    try {
+      const res = await fetch(API_BASE.replace("/resolutions", "/blockchain") + "/valid");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.is_valid) {
+        setSuccess("Ledger verified: The entire blockchain is structurally valid and mathematically intact.");
+      } else {
+        setError("Warning: The blockchain ledger has integrity violations!");
+      }
+    } catch {
+      setError("Could not complete validation request.");
+    } finally { setLoading(false); }
+  };
+
+  const handleValidateBlock = async (block_index) => {
+    setError(null); setSuccess(null);
+    try {
+      const res = await fetch(API_BASE.replace("/resolutions", "/blockchain") + `/valid/${block_index}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.is_valid) {
+        setSuccess(`Block #${block_index} verified: Perfect hash link and valid mathematical proof of work.`);
+      } else {
+        setError(`Warning: Block #${block_index} has been altered or has an invalid proof of work!`);
+      }
+    } catch {
+      setError("Could not complete block validation request.");
+    }
   };
 
   return (
@@ -384,11 +423,18 @@ export default function App() {
                   {resolutions.length} resolution{resolutions.length !== 1 ? "s" : ""} securely locked
                 </p>
               </div>
-              <button onClick={fetchResolutions} disabled={loading} style={{ padding: "8px 16px", borderRadius: 6, background: "transparent", border: "1px solid #27272a", color: "#a1a1aa", fontFamily: "'Space Mono',monospace", fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
-                {loading ? "Syncing..." : "Sync Chain"}
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={handleValidateChain} disabled={loading} style={{ padding: "8px 16px", borderRadius: 6, background: "transparent", border: "1px solid #27272a", color: "#a1a1aa", fontFamily: "'Space Mono',monospace", fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
+                  Validate Ledger
+                </button>
+                <button onClick={fetchResolutions} disabled={loading} style={{ padding: "8px 16px", borderRadius: 6, background: "transparent", border: "1px solid #27272a", color: "#a1a1aa", fontFamily: "'Space Mono',monospace", fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
+                  {loading ? "Syncing..." : "Sync Chain"}
+                </button>
+              </div>
             </div>
             {loading && !resolutions.length ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: "#71717a", fontFamily: "'Space Mono',monospace" }}>
@@ -419,6 +465,7 @@ export default function App() {
             onBack={() => setView("chain")}
             onUpdate={() => handleUpdate(selectedRes.goal_id)}
             onDelete={() => handleDelete(selectedRes.goal_id)}
+            onValidate={handleValidateBlock}
           />
         )}
 
