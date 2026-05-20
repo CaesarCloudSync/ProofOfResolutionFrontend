@@ -422,9 +422,7 @@ export default function App() {
           />
         )}
 
-        <div style={{ textAlign: "center", marginTop: 64, color: "#71717a", fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: 1 }}>
-          PROOF OF RESOLUTION — EST. {new Date().getFullYear()}
-        </div>
+
       </div>
     </div>
   );
