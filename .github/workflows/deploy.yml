@@ -10,7 +10,7 @@ env:
   SERVICE_NAME: proofofresolution-frontend
   REGION: us-central1
   IMAGE_NAME: proofofresolution-frontend
-  REACT_APP_API_BASE: https://proofofresolution-662756251108.us-central1.run.app
+  REACT_APP_API_BASE: https://proofofresolution-backend-662756251108.us-central1.run.app/resolutions
 
 jobs:
   deploy:
