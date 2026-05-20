@@ -2,87 +2,47 @@ import { useState, useEffect, useCallback } from "react";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8080/resolutions";
 
-const CATEGORY_ICONS = {
-  Health: "♥", Finance: "◈", Career: "▲", Learning: "◉",
-  Fitness: "⬡", Relationships: "✦", Mindfulness: "◎", General: "◆",
-};
-const CATEGORY_COLORS = {
-  Health: "#ff6b6b", Finance: "#ffd93d", Career: "#6bcb77", Learning: "#4d96ff",
-  Fitness: "#ff922b", Relationships: "#f06595", Mindfulness: "#cc5de8", General: "#74c0fc",
-};
-const CATEGORIES = Object.keys(CATEGORY_ICONS);
-
-/* ─── Star Field ─────────────────────────────────────────── */
-function StarField() {
-  const stars = Array.from({ length: 80 }, (_, i) => ({
-    id: i, x: Math.random() * 100, y: Math.random() * 100,
-    size: Math.random() * 2 + 0.5, opacity: Math.random() * 0.6 + 0.2, delay: Math.random() * 4,
-  }));
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", pointerEvents: "none" }}>
-      {stars.map(s => (
-        <div key={s.id} style={{
-          position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
-          width: s.size, height: s.size, borderRadius: "50%",
-          background: "#fff", opacity: s.opacity,
-          animation: `twinkle 3s ${s.delay}s ease-in-out infinite`,
-        }} />
-      ))}
-    </div>
-  );
-}
-
-/* ─── Firework ───────────────────────────────────────────── */
-function Firework({ x, y, onDone }) {
-  useEffect(() => { const t = setTimeout(onDone, 1200); return () => clearTimeout(t); }, [onDone]);
-  const particles = Array.from({ length: 12 }, (_, i) => {
-    const angle = (i / 12) * Math.PI * 2;
-    const dist = 60 + Math.random() * 30;
-    return { dx: Math.cos(angle) * dist, dy: Math.sin(angle) * dist, color: ["#ffd93d","#ff6b6b","#74c0fc","#6bcb77","#cc5de8"][i % 5] };
-  });
-  return (
-    <div style={{ position: "fixed", left: x, top: y, zIndex: 999, pointerEvents: "none" }}>
-      {particles.map((p, i) => (
-        <div key={i} style={{
-          position: "absolute", width: 6, height: 6, borderRadius: "50%",
-          background: p.color, animation: `burst 1.2s ease-out forwards`,
-          "--dx": `${p.dx}px`, "--dy": `${p.dy}px`,
-        }} />
-      ))}
-    </div>
-  );
-}
+const CATEGORIES = [
+  "Health", "Finance", "Career", "Learning",
+  "Fitness", "Relationships", "Mindfulness", "General"
+];
 
 /* ─── Mining Overlay ─────────────────────────────────────── */
 function MiningAnimation({ onComplete }) {
   const [progress, setProgress] = useState(0);
   const [hashStr, setHashStr] = useState("0000000000000000");
+
   useEffect(() => {
     const chars = "0123456789abcdef";
     let p = 0;
     const iv = setInterval(() => {
-      p += Math.random() * 3;
-      if (p >= 100) { p = 100; clearInterval(iv); setTimeout(onComplete, 600); }
+      p += Math.random() * 4;
+      if (p >= 100) {
+        p = 100;
+        clearInterval(iv);
+        setTimeout(onComplete, 500);
+      }
       setProgress(Math.min(p, 100));
       setHashStr(Array.from({ length: 16 }, (_, i) =>
         i < Math.floor((p / 100) * 4) ? "0" : chars[Math.floor(Math.random() * chars.length)]
       ).join(""));
-    }, 60);
+    }, 50);
     return () => clearInterval(iv);
   }, [onComplete]);
+
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,20,0.88)", backdropFilter: "blur(6px)" }}>
-      <div style={{ background: "linear-gradient(135deg,#0d0d2b,#1a1a4e)", border: "1px solid rgba(116,192,252,0.3)", borderRadius: 20, padding: "48px 64px", textAlign: "center", maxWidth: 420 }}>
-        <div style={{ display: "inline-block", border: "4px solid rgba(116,192,252,0.1)", borderTop: "4px solid #ffd93d", borderRadius: "50%", width: 50, height: 50, marginBottom: 20, animation: "spin 1s linear infinite" }} />
-        <h2 style={{ color: "#ffd93d", fontFamily: "'Space Mono',monospace", fontSize: 22, margin: "0 0 8px" }}>Mining Block...</h2>
-        <p style={{ color: "rgba(116,192,252,0.7)", fontSize: 13, fontFamily: "'Space Mono',monospace", margin: "0 0 24px" }}>Solving proof of work</p>
-        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: "#6bcb77", background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: "10px 16px", marginBottom: 24, letterSpacing: 2 }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(10,10,12,0.92)", backdropFilter: "blur(4px)" }}>
+      <div style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, padding: "40px 48px", textAlign: "center", maxWidth: 400, width: "90%" }}>
+        <div style={{ display: "inline-block", border: "2px solid #27272a", borderTop: "2px solid #ffffff", borderRadius: "50%", width: 36, height: 36, marginBottom: 20, animation: "spin 0.8s linear infinite" }} />
+        <h2 style={{ color: "#ffffff", fontFamily: "'Space Mono',monospace", fontSize: 18, margin: "0 0 6px", fontWeight: 700 }}>Mining Block...</h2>
+        <p style={{ color: "#a1a1aa", fontSize: 13, fontFamily: "'Space Mono',monospace", margin: "0 0 20px" }}>Solving proof of work</p>
+        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: "#a1a1aa", background: "#09090b", border: "1px solid #27272a", borderRadius: 6, padding: "10px 14px", marginBottom: 20, letterSpacing: 1 }}>
           {hashStr}
         </div>
-        <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 99, overflow: "hidden", height: 8, marginBottom: 12 }}>
-          <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg,#4d96ff,#ffd93d)", borderRadius: 99, transition: "width 0.1s" }} />
+        <div style={{ background: "#27272a", borderRadius: 99, overflow: "hidden", height: 6, marginBottom: 12 }}>
+          <div style={{ height: "100%", width: `${progress}%`, background: "#ffffff", borderRadius: 99, transition: "width 0.1s" }} />
         </div>
-        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontFamily: "'Space Mono',monospace", margin: 0 }}>{Math.round(progress)}%</p>
+        <p style={{ color: "#71717a", fontSize: 12, fontFamily: "'Space Mono',monospace", margin: 0 }}>{Math.round(progress)}%</p>
       </div>
     </div>
   );
@@ -91,31 +51,33 @@ function MiningAnimation({ onComplete }) {
 /* ─── Immutable Modal (Update / Delete response) ─────────── */
 function ImmutableModal({ data, onClose }) {
   const isDelete = data.message.toLowerCase().includes("forget") || data.message.toLowerCase().includes("outrun");
-  const accent = isDelete ? "#ff6b6b" : "#ffd93d";
   return (
     <div
       onClick={onClose}
-      style={{ position: "fixed", inset: 0, zIndex: 150, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,20,0.88)", backdropFilter: "blur(6px)" }}>
+      style={{ position: "fixed", inset: 0, zIndex: 150, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(10,10,12,0.92)", backdropFilter: "blur(4px)" }}>
       <div
         onClick={e => e.stopPropagation()}
-        style={{ background: "linear-gradient(135deg,#0d0d2b,#1a1a4e)", border: `1px solid ${accent}44`, borderRadius: 20, padding: "40px 48px", maxWidth: 460, width: "90%", textAlign: "center", animation: "slideInUp 0.35s ease-out", position: "relative" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${accent},transparent)`, borderRadius: "20px 20px 0 0" }} />
-        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: accent, marginBottom: 20, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>
+        style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, padding: "36px 40px", maxWidth: 480, width: "90%", animation: "slideInUp 0.25s ease-out" }}>
+        <div style={{ fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", color: "#a1a1aa", marginBottom: 16, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>
           {isDelete ? "Action Locked" : "Action Forbidden"}
         </div>
-        <p style={{ color: "#fff", fontSize: 16, lineHeight: 1.6, margin: "0 0 16px", fontFamily: "'Space Grotesk',sans-serif" }}>
+        <p style={{ color: "#ffffff", fontSize: 15, lineHeight: 1.6, margin: "0 0 16px", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500 }}>
           {data.message}
         </p>
-        <p style={{ color: accent, fontSize: 13, fontFamily: "'Space Mono',monospace", margin: "0 0 28px", lineHeight: 1.5 }}>
+        <p style={{ color: "#a1a1aa", fontSize: 13, fontFamily: "'Space Grotesk',sans-serif", margin: "0 0 24px", lineHeight: 1.5 }}>
           {data.tip}
         </p>
-        <div style={{ marginBottom: 24, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: "10px 16px" }}>
-          <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, fontFamily: "'Space Mono',monospace" }}>GOAL ID </span>
-          <span style={{ color: accent, fontSize: 11, fontFamily: "'Space Mono',monospace", wordBreak: "break-all" }}>{data.goal_id}</span>
+        <div style={{ marginBottom: 24, background: "#09090b", border: "1px solid #27272a", borderRadius: 6, padding: "10px 14px" }}>
+          <span style={{ color: "#71717a", fontSize: 11, fontFamily: "'Space Mono',monospace" }}>GOAL ID </span>
+          <span style={{ color: "#f4f4f5", fontSize: 11, fontFamily: "'Space Mono',monospace", wordBreak: "break-all" }}>{data.goal_id}</span>
         </div>
-        <button onClick={onClose} style={{ padding: "12px 32px", borderRadius: 10, background: `${accent}18`, border: `1px solid ${accent}55`, color: accent, fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer" }}>
-          GOT IT
-        </button>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button onClick={onClose} style={{ padding: "10px 24px", borderRadius: 6, background: "#ffffff", border: "1px solid #ffffff", color: "#09090b", fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#e4e4e7"}
+            onMouseLeave={e => e.currentTarget.style.background = "#ffffff"}>
+            ACKNOWLEDGE
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -123,85 +85,76 @@ function ImmutableModal({ data, onClose }) {
 
 /* ─── Resolution Detail View ─────────────────────────────── */
 function ResolutionDetail({ resolution, onBack, onUpdate, onDelete }) {
-  const color = CATEGORY_COLORS[resolution.category] || CATEGORY_COLORS.General;
-  const icon = CATEGORY_ICONS[resolution.category] || CATEGORY_ICONS.General;
   return (
-    <div style={{ animation: "slideInUp 0.35s ease-out" }}>
-      <button onClick={onBack} style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 24, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.7)", borderRadius: 10, padding: "10px 18px", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer" }}>
+    <div style={{ animation: "slideInUp 0.25s ease-out" }}>
+      <button onClick={onBack} style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 20, background: "#18181b", border: "1px solid #27272a", color: "#a1a1aa", borderRadius: 6, padding: "8px 14px", fontFamily: "'Space Mono',monospace", fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}
+        onMouseEnter={e => { e.currentTarget.style.background = "#27272a"; e.currentTarget.style.color = "#ffffff"; }}
+        onMouseLeave={e => { e.currentTarget.style.background = "#18181b"; e.currentTarget.style.color = "#a1a1aa"; }}>
         ← BACK TO CHAIN
       </button>
 
-      <div style={{ background: "linear-gradient(135deg,rgba(13,13,43,0.98),rgba(26,26,78,0.98))", border: `1px solid ${color}44`, borderRadius: 20, overflow: "hidden" }}>
-        <div style={{ height: 4, background: `linear-gradient(90deg,transparent,${color},transparent)` }} />
-        <div style={{ padding: "32px 36px" }}>
+      <div style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, padding: "32px 36px" }}>
+        {/* Header */}
+        <div style={{ marginBottom: 24 }}>
+          <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 4, background: "#27272a", color: "#e4e4e7", border: "1px solid #3f3f46", fontFamily: "'Space Mono',monospace" }}>
+            {resolution.category}
+          </span>
+          <h2 style={{ color: "#ffffff", fontSize: 24, margin: "12px 0 0", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>
+            {resolution.title}
+          </h2>
+        </div>
 
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 18, marginBottom: 28 }}>
-            <div style={{ width: 60, height: 60, borderRadius: 16, flexShrink: 0, background: color + "22", border: `1px solid ${color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28 }}>
-              {icon}
-            </div>
-            <div style={{ flex: 1 }}>
-              <h2 style={{ color: "#fff", fontSize: 22, margin: "0 0 8px", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>
-                {resolution.title}
-              </h2>
-              <span style={{ fontSize: 12, padding: "3px 12px", borderRadius: 99, background: color + "22", color, border: `1px solid ${color}44`, fontFamily: "'Space Mono',monospace" }}>
-                {resolution.category}
-              </span>
-            </div>
+        {/* Description */}
+        {resolution.description && (
+          <div style={{ marginBottom: 28, borderTop: "1px solid #27272a", paddingTop: 20 }}>
+            <label style={{ display: "block", color: "#71717a", fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: 0.5, marginBottom: 6 }}>DESCRIPTION</label>
+            <p style={{ color: "#d4d4d8", fontSize: 14, lineHeight: 1.6, margin: 0 }}>{resolution.description}</p>
           </div>
+        )}
 
-          {/* Description */}
-          {resolution.description && (
-            <div style={{ marginBottom: 28 }}>
-              <label style={{ display: "block", color: "rgba(116,192,252,0.6)", fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: 1, marginBottom: 8 }}>DESCRIPTION</label>
-              <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 15, lineHeight: 1.7, margin: 0 }}>{resolution.description}</p>
-            </div>
-          )}
-
-          {/* Block Info Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 32 }}>
-            {[
-              { label: "BLOCK INDEX", value: `#${resolution.block_index}`, color: "#74c0fc", large: true },
-              { label: "CATEGORY", value: `${icon} ${resolution.category}`, color, large: true },
-              { label: "GOAL ID", value: resolution.goal_id, color: "#cc5de8", mono: true, span: 2 },
-              { label: "BLOCK HASH", value: resolution.block_hash, color: "#6bcb77", mono: true, span: 2 },
-            ].map((item, i) => (
-              <div key={i} style={{ gridColumn: item.span ? `span ${item.span}` : undefined, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: "14px 16px", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 10, fontFamily: "'Space Mono',monospace", letterSpacing: 1, marginBottom: 6 }}>{item.label}</div>
-                <div style={{
-                  color: item.color,
-                  fontSize: item.large ? 20 : item.mono ? 12 : 15,
-                  fontFamily: item.mono ? "'Space Mono',monospace" : "'Space Grotesk',sans-serif",
-                  fontWeight: item.large ? 700 : 400,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
-                }}>
-                  {item.value}
-                </div>
+        {/* Block Info Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 32, borderTop: "1px solid #27272a", paddingTop: 20 }}>
+          {[
+            { label: "BLOCK INDEX", value: `#${resolution.block_index}`, large: true },
+            { label: "CATEGORY", value: resolution.category, large: true },
+            { label: "GOAL ID", value: resolution.goal_id, mono: true, span: 2 },
+            { label: "BLOCK HASH", value: resolution.block_hash, mono: true, span: 2 },
+          ].map((item, i) => (
+            <div key={i} style={{ gridColumn: item.span ? `span ${item.span}` : undefined, background: "#09090b", borderRadius: 6, padding: "12px 16px", border: "1px solid #27272a" }}>
+              <div style={{ color: "#71717a", fontSize: 10, fontFamily: "'Space Mono',monospace", letterSpacing: 0.5, marginBottom: 4 }}>{item.label}</div>
+              <div style={{
+                color: "#ffffff",
+                fontSize: item.large ? 18 : item.mono ? 12 : 14,
+                fontFamily: item.mono ? "'Space Mono',monospace" : "'Space Grotesk',sans-serif",
+                fontWeight: item.large ? 700 : 400,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+              }}>
+                {item.value}
               </div>
-            ))}
-          </div>
-
-          {/* Update / Delete */}
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 24 }}>
-            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, fontFamily: "'Space Mono',monospace", marginBottom: 14, textAlign: "center", letterSpacing: 1 }}>
-              BLOCKCHAIN OPERATIONS
-            </p>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button
-                onClick={onUpdate}
-                style={{ flex: 1, padding: "14px", borderRadius: 12, background: "rgba(255,217,61,0.08)", border: "1px solid rgba(255,217,61,0.3)", color: "#ffd93d", fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer", transition: "background 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,217,61,0.16)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,217,61,0.08)"}>
-                UPDATE
-              </button>
-              <button
-                onClick={onDelete}
-                style={{ flex: 1, padding: "14px", borderRadius: 12, background: "rgba(255,107,107,0.08)", border: "1px solid rgba(255,107,107,0.3)", color: "#ff6b6b", fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer", transition: "background 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,107,0.16)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,107,107,0.08)"}>
-                DELETE
-              </button>
             </div>
+          ))}
+        </div>
+
+        {/* Update / Delete */}
+        <div style={{ borderTop: "1px solid #27272a", paddingTop: 24 }}>
+          <p style={{ color: "#71717a", fontSize: 10, fontFamily: "'Space Mono',monospace", marginBottom: 12, textAlign: "center", letterSpacing: 1 }}>
+            LEDGER AMENDMENT REQUESTS
+          </p>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button
+              onClick={onUpdate}
+              style={{ flex: 1, padding: "12px", borderRadius: 6, background: "transparent", border: "1px solid #27272a", color: "#a1a1aa", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer", transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
+              MUTATE
+            </button>
+            <button
+              onClick={onDelete}
+              style={{ flex: 1, padding: "12px", borderRadius: 6, background: "transparent", border: "1px solid #27272a", color: "#a1a1aa", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer", transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
+              PURGE
+            </button>
           </div>
         </div>
       </div>
@@ -211,33 +164,27 @@ function ResolutionDetail({ resolution, onBack, onUpdate, onDelete }) {
 
 /* ─── Block Card ─────────────────────────────────────────── */
 function BlockCard({ resolution, isNew, onClick }) {
-  const color = CATEGORY_COLORS[resolution.category] || CATEGORY_COLORS.General;
-  const icon = CATEGORY_ICONS[resolution.category] || CATEGORY_ICONS.General;
   return (
     <div
       onClick={onClick}
-      style={{ background: "linear-gradient(135deg,rgba(13,13,43,0.95),rgba(26,26,78,0.95))", border: `1px solid ${color}44`, borderRadius: 16, padding: "20px 24px", position: "relative", overflow: "hidden", cursor: "pointer", animation: isNew ? "slideInUp 0.5s ease-out" : "none", transition: "border-color 0.2s, transform 0.2s" }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = color + "99"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = color + "44"; e.currentTarget.style.transform = ""; }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${color},transparent)` }} />
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: color + "22", border: `1px solid ${color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
-          {icon}
-        </div>
+      style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 6, padding: "18px 20px", position: "relative", cursor: "pointer", animation: isNew ? "slideInUp 0.4s ease-out" : "none", transition: "border-color 0.2s" }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = "#3f3f46"}
+      onMouseLeave={e => e.currentTarget.style.borderColor = "#27272a"}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
-            <h3 style={{ color: "#fff", fontSize: 16, margin: 0, fontWeight: 600, fontFamily: "'Space Grotesk',sans-serif" }}>{resolution.title}</h3>
-            <span style={{ fontSize: 11, padding: "2px 10px", borderRadius: 99, background: color + "22", color, border: `1px solid ${color}44`, fontFamily: "'Space Mono',monospace" }}>{resolution.category}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+            <h3 style={{ color: "#ffffff", fontSize: 15, margin: 0, fontWeight: 600, fontFamily: "'Space Grotesk',sans-serif" }}>{resolution.title}</h3>
+            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#27272a", color: "#a1a1aa", border: "1px solid #3f3f46", fontFamily: "'Space Mono',monospace" }}>{resolution.category}</span>
           </div>
           {resolution.description && (
-            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, margin: "0 0 10px", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <p style={{ color: "#71717a", fontSize: 13, margin: "0 0 10px", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {resolution.description}
             </p>
           )}
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ color: "#74c0fc", fontSize: 11, fontFamily: "'Space Mono',monospace" }}>BLOCK #{resolution.block_index}</span>
-            <span style={{ color: "#6bcb77", fontSize: 11, fontFamily: "'Space Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200, whiteSpace: "nowrap" }}>{resolution.block_hash}</span>
-            <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.3)", fontSize: 12 }}>VIEW →</span>
+            <span style={{ color: "#ffffff", fontSize: 11, fontFamily: "'Space Mono',monospace", fontWeight: 700 }}>BLOCK #{resolution.block_index}</span>
+            <span style={{ color: "#71717a", fontSize: 11, fontFamily: "'Space Mono',monospace", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200, whiteSpace: "nowrap" }}>{resolution.block_hash}</span>
+            <span style={{ marginLeft: "auto", color: "#a1a1aa", fontSize: 11, fontFamily: "'Space Mono',monospace" }}>INSPECT →</span>
           </div>
         </div>
       </div>
@@ -255,7 +202,6 @@ export default function App() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [newIds, setNewIds] = useState(new Set());
-  const [fireworks, setFireworks] = useState([]);
   const [immutableModal, setImmutableModal] = useState(null);
   const [form, setForm] = useState({ title: "", description: "", category: "General" });
 
@@ -286,15 +232,6 @@ export default function App() {
 
   useEffect(() => { if (view === "chain") fetchResolutions(); }, [view, fetchResolutions]);
 
-  const spawnFireworks = () => {
-    const fws = Array.from({ length: 6 }, (_, i) => ({
-      id: Date.now() + i,
-      x: 100 + Math.random() * (window.innerWidth - 200),
-      y: 80 + Math.random() * (window.innerHeight - 200),
-    }));
-    setFireworks(fws);
-  };
-
   const handleSubmit = () => {
     if (!form.title.trim()) { setError("A resolution needs a title!"); return; }
     setError(null); setMining(true);
@@ -306,10 +243,9 @@ export default function App() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Failed");
       setMining(false);
-      setSuccess(`Block #${data.block.index} mined! Your resolution is forever on the chain.`);
+      setSuccess(`Block #${data.block.index} mined! Your resolution is securely etched.`);
       setNewIds(s => new Set([...s, data.goal_id]));
       setForm({ title: "", description: "", category: "General" });
-      spawnFireworks();
       setTimeout(() => setSuccess(null), 6000);
     } catch (e) {
       setMining(false); setError(e.message || "Mining failed.");
@@ -333,46 +269,48 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg,#05051a 0%,#0d0d2b 40%,#1a0a2e 100%)", fontFamily: "'Space Grotesk',sans-serif", position: "relative", color: "#fff" }}>
+    <div style={{ minHeight: "100vh", background: "#09090b", fontFamily: "'Space Grotesk',sans-serif", position: "relative", color: "#f4f4f5" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-        @keyframes twinkle{0%,100%{opacity:0.2}50%{opacity:0.9}}
         @keyframes spin{to{transform:rotate(360deg)}}
-        @keyframes burst{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:0}}
-        @keyframes slideInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-        @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+        @keyframes slideInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         *{box-sizing:border-box}
-        input,textarea,select{background:rgba(255,255,255,0.06)!important;border:1px solid rgba(116,192,252,0.25)!important;color:#fff!important;border-radius:10px!important;padding:12px 16px!important;font-size:15px!important;font-family:'Space Grotesk',sans-serif!important;width:100%!important;outline:none!important;transition:border-color 0.2s!important}
-        input:focus,textarea:focus,select:focus{border-color:rgba(116,192,252,0.6)!important}
-        input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.3)!important}
-        select option{background:#1a1a4e;color:#fff}
-        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(116,192,252,0.2);border-radius:3px}
+        input,textarea,select{background:#18181b!important;border:1px solid #27272a!important;color:#ffffff!important;border-radius:6px!important;padding:12px 14px!important;font-size:14px!important;font-family:'Space Grotesk',sans-serif!important;width:100%!important;outline:none!important;transition:border-color 0.2s!important}
+        input:focus,textarea:focus,select:focus{border-color:#52525b!important}
+        input::placeholder,textarea::placeholder{color:#52525b!important}
+        select option{background:#18181b;color:#ffffff}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#27272a;border-radius:3px}
       `}</style>
-
-      <StarField />
-
-      {fireworks.map(fw => (
-        <Firework key={fw.id} x={fw.x} y={fw.y} onDone={() => setFireworks(f => f.filter(x => x.id !== fw.id))} />
-      ))}
 
       {mining && <MiningAnimation onComplete={handleMined} />}
       {immutableModal && <ImmutableModal data={immutableModal} onClose={() => setImmutableModal(null)} />}
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "0 20px 80px" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 20px 80px" }}>
 
         {/* ── Header ── */}
-        <div style={{ textAlign: "center", padding: "60px 0 40px" }}>
-          <h1 style={{ fontFamily: "'Space Mono',monospace", fontSize: "clamp(28px,6vw,48px)", margin: "0 0 8px", letterSpacing: -1, background: "linear-gradient(135deg,#ffd93d 0%,#ff6b6b 50%,#74c0fc 100%)", backgroundSize: "200% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 4s linear infinite" }}>
+        <div style={{ textAlign: "center", padding: "64px 0 36px" }}>
+          <h1 style={{ fontFamily: "'Space Mono',monospace", fontSize: 28, fontWeight: 700, margin: "0 0 6px", letterSpacing: -0.5, color: "#ffffff" }}>
             ProofOfResolution
           </h1>
-          <p style={{ color: "rgba(116,192,252,0.7)", fontSize: 14, fontFamily: "'Space Mono',monospace", margin: 0 }}>BLOCKCHAIN — NEW YEAR — FOREVER</p>
+          <p style={{ color: "#71717a", fontSize: 13, fontFamily: "'Space Mono',monospace", margin: 0, letterSpacing: 0.5 }}>IMMUTABLE RESOLUTION LEDGER</p>
         </div>
 
         {/* ── Nav ── */}
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 40 }}>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 36 }}>
           {[{ id: "home", label: "Mine Resolution" }, { id: "chain", label: "The Chain" }].map(tab => (
-            <button key={tab.id} onClick={() => setView(tab.id)} style={{ padding: "12px 28px", borderRadius: 99, fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer", transition: "all 0.2s", border: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "1px solid #ffd93d" : "1px solid rgba(255,255,255,0.15)", background: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "rgba(255,217,61,0.12)" : "rgba(255,255,255,0.04)", color: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "#ffd93d" : "rgba(255,255,255,0.6)" }}>
+            <button key={tab.id} onClick={() => setView(tab.id)} style={{ padding: "10px 22px", borderRadius: 6, fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s", border: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "1px solid #ffffff" : "1px solid #27272a", background: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "#ffffff" : "transparent", color: (view === tab.id || (tab.id === "chain" && view === "detail")) ? "#09090b" : "#a1a1aa" }}
+              onMouseEnter={e => {
+                if (view !== tab.id && !(tab.id === "chain" && view === "detail")) {
+                  e.currentTarget.style.borderColor = "#3f3f46";
+                  e.currentTarget.style.color = "#ffffff";
+                }
+              }}
+              onMouseLeave={e => {
+                if (view !== tab.id && !(tab.id === "chain" && view === "detail")) {
+                  e.currentTarget.style.borderColor = "#27272a";
+                  e.currentTarget.style.color = "#a1a1aa";
+                }
+              }}>
               {tab.label}
             </button>
           ))}
@@ -380,56 +318,56 @@ export default function App() {
 
         {/* ── Banners ── */}
         {error && (
-          <div style={{ background: "rgba(255,107,107,0.12)", border: "1px solid rgba(255,107,107,0.35)", borderRadius: 12, padding: "14px 20px", marginBottom: 20, color: "#ff6b6b", fontSize: 14, display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, padding: "12px 18px", marginBottom: 20, color: "#f87171", fontSize: 13, display: "flex", gap: 10, alignItems: "center", fontFamily: "'Space Grotesk',sans-serif" }}>
             {error}
-            <button onClick={() => setError(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ff6b6b", cursor: "pointer", fontSize: 16 }}>✕</button>
+            <button onClick={() => setError(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: 14 }}>✕</button>
           </div>
         )}
         {success && (
-          <div style={{ background: "rgba(107,203,119,0.12)", border: "1px solid rgba(107,203,119,0.35)", borderRadius: 12, padding: "14px 20px", marginBottom: 20, color: "#6bcb77", fontSize: 14, fontFamily: "'Space Mono',monospace", animation: "slideInUp 0.4s ease-out" }}>
+          <div style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.25)", borderRadius: 6, padding: "12px 18px", marginBottom: 20, color: "#4ade80", fontSize: 13, fontFamily: "'Space Mono',monospace", animation: "slideInUp 0.3s ease-out" }}>
             {success}
           </div>
         )}
 
         {/* ══════════ VIEW: HOME ══════════ */}
         {view === "home" && (
-          <div style={{ background: "linear-gradient(135deg,rgba(13,13,43,0.98),rgba(26,26,78,0.98))", border: "1px solid rgba(116,192,252,0.2)", borderRadius: 20, padding: "36px 40px" }}>
-            <div style={{ textAlign: "center", marginBottom: 32 }}>
-              <h2 style={{ fontFamily: "'Space Mono',monospace", color: "#ffd93d", fontSize: 20, margin: "0 0 6px" }}>Mint Your Resolution</h2>
-              <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, margin: 0 }}>Once mined, your resolution lives on the chain forever.</p>
+          <div style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, padding: "36px 40px" }}>
+            <div style={{ textAlign: "center", marginBottom: 28 }}>
+              <h2 style={{ fontFamily: "'Space Mono',monospace", color: "#ffffff", fontSize: 18, margin: "0 0 6px", fontWeight: 700 }}>Commit A Resolution</h2>
+              <p style={{ color: "#71717a", fontSize: 13, margin: 0 }}>Once mined, your goals are permanently locked onto the chain.</p>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               <div>
-                <label style={{ display: "block", color: "rgba(116,192,252,0.8)", fontSize: 11, fontFamily: "'Space Mono',monospace", marginBottom: 8, letterSpacing: 1 }}>RESOLUTION TITLE *</label>
-                <input placeholder="e.g. Run a marathon by June" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} onKeyDown={e => e.key === "Enter" && handleSubmit()} />
+                <label style={{ display: "block", color: "#a1a1aa", fontSize: 11, fontFamily: "'Space Mono',monospace", marginBottom: 6, letterSpacing: 0.5 }}>RESOLUTION TITLE *</label>
+                <input placeholder="e.g. Complete core training by September" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} onKeyDown={e => e.key === "Enter" && handleSubmit()} />
               </div>
               <div>
-                <label style={{ display: "block", color: "rgba(116,192,252,0.8)", fontSize: 11, fontFamily: "'Space Mono',monospace", marginBottom: 8, letterSpacing: 1 }}>DESCRIPTION</label>
-                <textarea placeholder="What does this mean to you?" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: "vertical" }} />
+                <label style={{ display: "block", color: "#a1a1aa", fontSize: 11, fontFamily: "'Space Mono',monospace", marginBottom: 6, letterSpacing: 0.5 }}>DESCRIPTION</label>
+                <textarea placeholder="Outline your commitment parameters..." rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: "none" }} />
               </div>
               <div>
-                <label style={{ display: "block", color: "rgba(116,192,252,0.8)", fontSize: 11, fontFamily: "'Space Mono',monospace", marginBottom: 8, letterSpacing: 1 }}>CATEGORY</label>
+                <label style={{ display: "block", color: "#a1a1aa", fontSize: 11, fontFamily: "'Space Mono',monospace", marginBottom: 6, letterSpacing: 0.5 }}>CATEGORY</label>
                 <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_ICONS[c]} {c}</option>)}
+                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <button
                 onClick={handleSubmit}
-                style={{ marginTop: 8, padding: "16px 32px", borderRadius: 12, background: "linear-gradient(135deg,#ffd93d,#ff922b)", border: "none", color: "#0d0d2b", fontWeight: 700, fontFamily: "'Space Mono',monospace", fontSize: 15, cursor: "pointer", letterSpacing: 1, transition: "all 0.2s", boxShadow: "0 4px 30px rgba(255,217,61,0.25)" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 8px 40px rgba(255,217,61,0.4)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 30px rgba(255,217,61,0.25)"; }}>
+                style={{ marginTop: 6, padding: "14px 28px", borderRadius: 6, background: "#ffffff", border: "1px solid #ffffff", color: "#09090b", fontWeight: 700, fontFamily: "'Space Mono',monospace", fontSize: 13, cursor: "pointer", transition: "all 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "#e4e4e7"}
+                onMouseLeave={e => e.currentTarget.style.background = "#ffffff"}>
                 MINE BLOCK
               </button>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginTop: 32 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginTop: 36, borderTop: "1px solid #27272a", paddingTop: 28 }}>
               {[
-                { color: "#ffd93d", title: "Immutable", body: "Once mined, never changed" },
-                { color: "#74c0fc", title: "Chained", body: "Linked to all prior blocks" },
-                { color: "#cc5de8", title: "Forever", body: "Stored on the blockchain" }
+                { title: "Immutable Ledger", body: "Guaranteed accountability through cryptographic hashing." },
+                { title: "Strictly Chained", body: "Secured using linked block consensus keys." },
+                { title: "Permanent Storage", body: "Retained locally forever inside the host database." }
               ].map(item => (
-                <div key={item.title} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderTop: `2px solid ${item.color}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
-                  <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, fontWeight: 700, marginBottom: 6, fontFamily: "'Space Grotesk',sans-serif" }}>{item.title}</div>
-                  <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, lineHeight: 1.4 }}>{item.body}</div>
+                <div key={item.title} style={{ background: "#09090b", border: "1px solid #27272a", borderRadius: 6, padding: "16px 20px" }}>
+                  <div style={{ color: "#ffffff", fontSize: 13, fontWeight: 700, marginBottom: 6, fontFamily: "'Space Mono',monospace" }}>{item.title}</div>
+                  <div style={{ color: "#71717a", fontSize: 12, lineHeight: 1.5 }}>{item.body}</div>
                 </div>
               ))}
             </div>
@@ -441,29 +379,31 @@ export default function App() {
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
               <div>
-                <h2 style={{ fontFamily: "'Space Mono',monospace", color: "#ffd93d", fontSize: 20, margin: "0 0 4px" }}>The Chain</h2>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, margin: 0 }}>
-                  {resolutions.length} resolution{resolutions.length !== 1 ? "s" : ""} minted — click any to inspect
+                <h2 style={{ fontFamily: "'Space Mono',monospace", color: "#ffffff", fontSize: 18, margin: "0 0 4px", fontWeight: 700 }}>The Chain</h2>
+                <p style={{ color: "#71717a", fontSize: 13, margin: 0 }}>
+                  {resolutions.length} resolution{resolutions.length !== 1 ? "s" : ""} securely locked
                 </p>
               </div>
-              <button onClick={fetchResolutions} disabled={loading} style={{ padding: "10px 20px", borderRadius: 10, background: "rgba(116,192,252,0.08)", border: "1px solid rgba(116,192,252,0.25)", color: "#74c0fc", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer" }}>
-                {loading ? "⟳ Loading..." : "↻ Refresh"}
+              <button onClick={fetchResolutions} disabled={loading} style={{ padding: "8px 16px", borderRadius: 6, background: "transparent", border: "1px solid #27272a", color: "#a1a1aa", fontFamily: "'Space Mono',monospace", fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#ffffff"; e.currentTarget.style.color = "#ffffff"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#27272a"; e.currentTarget.style.color = "#a1a1aa"; }}>
+                {loading ? "Syncing..." : "Sync Chain"}
               </button>
             </div>
             {loading && !resolutions.length ? (
-              <div style={{ textAlign: "center", padding: "60px 0", color: "rgba(116,192,252,0.5)", fontFamily: "'Space Mono',monospace" }}>
-                <div style={{ display: "inline-block", border: "3px solid rgba(116,192,252,0.1)", borderTop: "3px solid #ffd93d", borderRadius: "50%", width: 36, height: 36, marginBottom: 16, animation: "spin 1s linear infinite" }} />
-                <div style={{ fontSize: 13 }}>Syncing with the chain...</div>
+              <div style={{ textAlign: "center", padding: "60px 0", color: "#71717a", fontFamily: "'Space Mono',monospace" }}>
+                <div style={{ display: "inline-block", border: "2px solid #27272a", borderTop: "2px solid #ffffff", borderRadius: "50%", width: 28, height: 28, marginBottom: 12, animation: "spin 0.8s linear infinite" }} />
+                <div style={{ fontSize: 12 }}>Retrieving blocks...</div>
               </div>
             ) : resolutions.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "60px 20px", background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: 20 }}>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono',monospace", fontSize: 13, margin: "0 0 16px" }}>The chain is empty.<br />Mine your first resolution!</p>
-                <button onClick={() => setView("home")} style={{ padding: "10px 24px", borderRadius: 10, background: "rgba(255,217,61,0.1)", border: "1px solid rgba(255,217,61,0.3)", color: "#ffd93d", fontFamily: "'Space Mono',monospace", fontSize: 12, cursor: "pointer" }}>
-                  Mine First Resolution
+              <div style={{ textAlign: "center", padding: "60px 20px", background: "#18181b", border: "1px dashed #27272a", borderRadius: 8 }}>
+                <p style={{ color: "#71717a", fontFamily: "'Space Mono',monospace", fontSize: 12, margin: "0 0 16px" }}>The chain is currently unpopulated.<br />Mine your first resolution!</p>
+                <button onClick={() => setView("home")} style={{ padding: "8px 18px", borderRadius: 6, background: "#ffffff", border: "1px solid #ffffff", color: "#09090b", fontFamily: "'Space Mono',monospace", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                  Commence Ledger
                 </button>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[...resolutions].reverse().map(r => (
                   <BlockCard key={r.goal_id} resolution={r} isNew={newIds.has(r.goal_id)} onClick={() => fetchSingle(r.goal_id)} />
                 ))}
@@ -482,8 +422,8 @@ export default function App() {
           />
         )}
 
-        <div style={{ textAlign: "center", marginTop: 60, color: "rgba(255,255,255,0.2)", fontSize: 12, fontFamily: "'Space Mono',monospace" }}>
-          PROOF OF RESOLUTION — {new Date().getFullYear()}
+        <div style={{ textAlign: "center", marginTop: 64, color: "#71717a", fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: 1 }}>
+          PROOF OF RESOLUTION — EST. {new Date().getFullYear()}
         </div>
       </div>
     </div>
