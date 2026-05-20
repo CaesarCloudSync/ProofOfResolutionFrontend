@@ -10,7 +10,7 @@ env:
   SERVICE_NAME: proofofresolution-frontend
   REGION: us-central1
   IMAGE_NAME: proofofresolution-frontend
-  REACT_APP_API_BASE: https://proofofresolution-backend-662756251108.us-central1.run.app/resolutions
+  REACT_APP_API_BASE: https://proofofresolution-662756251108.us-central1.run.app
 
 jobs:
   deploy:
@@ -37,8 +37,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
+          API_BASE="${{ secrets.REACT_APP_API_BASE }}"
+          if [ -z "$API_BASE" ]; then
+            API_BASE="${{ env.REACT_APP_API_BASE }}"
+          fi
           docker build --progress=plain \
-            --build-arg REACT_APP_API_BASE=${{ env.REACT_APP_API_BASE }} \
+            --build-arg REACT_APP_API_BASE="$API_BASE" \
             -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/caesaraiapis/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             -t us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/caesaraiapis/${{ env.IMAGE_NAME }}:latest \
             .
@@ -55,3 +59,5 @@ jobs:
           region: ${{ env.REGION }}
           image: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/caesaraiapis/${{ env.IMAGE_NAME }}:${{ github.sha }}
           flags: '--allow-unauthenticated --port=80'
+          env_vars: |
+            REACT_APP_API_BASE=${{ secrets.REACT_APP_API_BASE }}
